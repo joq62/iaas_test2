@@ -87,10 +87,38 @@ mnesia_start_test()->
 							    {ip,Ip},
 							    {port,Port},
 							    {slaves,SlaveVmIdList}}<-HostInfo],
+    
+
+    [{{id,'joq62-X550CA'},{ip,"192.168.1.50"},{port,22},
+      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
+     {{id,c0},{ip,"192.168.1.200"},{port,22},
+      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
+     {{id,c1},{ip,"192.168.1.201"},{port,22},
+      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
+     {{id,c2},{ip,"192.168.1.202"},{port,22},
+      {slaves,["slave0","slave1","slave2","slave3","slave4"]}}]=HostInfo,
   
     %Create table and load
   
+    % Test this part 
 
+    [{"192.168.1.50",22,"joq62","festum01",
+     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read('joq62-X550CA'),
+    [{"192.168.1.200",22,"joq62","festum01",
+     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read(c0),
+    [{"192.168.1.201",22,"joq62","festum01",
+     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read(c1),
+    [{"192.168.1.202",22,"joq62","festum01",
+     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read(c2),
+
+    [{c2,"192.168.1.202",22,"joq62","festum01",
+      ["slave0","slave1","slave2","slave3","slave4"]},
+     {c1,"192.168.1.201",22,"joq62","festum01",
+      ["slave0","slave1","slave2","slave3","slave4"]},
+     {'joq62-X550CA',"192.168.1.50",22,"joq62","festum01",
+      ["slave0","slave1","slave2","slave3","slave4"]},
+     {c0,"192.168.1.200",22,"joq62","festum01",
+      ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read_all(),
     
 
     %% Create Wanted state and check nodes to Restart and Stop
@@ -120,35 +148,6 @@ mnesia_start_test()->
     StopNodes=[Node||Node<-AllNodes,
 			false==lists:member(Node,WantedState)],
     io:format("StopNodes ~p~n",[{StopNodes,?MODULE,?FUNCTION_NAME,?LINE}]),   
-
-   % Test this part 
-    [{{id,'joq62-X550CA'},{ip,"192.168.1.50"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
-     {{id,c0},{ip,"192.168.1.200"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
-     {{id,c1},{ip,"192.168.1.201"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
-     {{id,c2},{ip,"192.168.1.202"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}}]=HostInfo,
-    
-    [{"192.168.1.50",22,"joq62","festum01",
-     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read('joq62-X550CA'),
-    [{"192.168.1.200",22,"joq62","festum01",
-     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read(c0),
-    [{"192.168.1.201",22,"joq62","festum01",
-     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read(c1),
-    [{"192.168.1.202",22,"joq62","festum01",
-     ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read(c2),
-
-    [{c2,"192.168.1.202",22,"joq62","festum01",
-      ["slave0","slave1","slave2","slave3","slave4"]},
-     {c1,"192.168.1.201",22,"joq62","festum01",
-      ["slave0","slave1","slave2","slave3","slave4"]},
-     {'joq62-X550CA',"192.168.1.50",22,"joq62","festum01",
-      ["slave0","slave1","slave2","slave3","slave4"]},
-     {c0,"192.168.1.200",22,"joq62","festum01",
-      ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read_all(),
-
 
     ['master@c0','master@c1','master@c2','master@joq62-X550CA',
      'slave0@c0','slave0@c1','slave0@c2','slave0@joq62-X550CA',
