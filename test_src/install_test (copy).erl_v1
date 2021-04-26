@@ -1,0 +1,123 @@
+%%% -------------------------------------------------------------------
+%%% @author  : Joq Erlang
+%%% @doc : represent a logical vm   
+%%% 
+%%% Supports the system with standard erlang vm functionality, load and start
+%%% of an erlang application (downloaded from git hub) and "dns" support 
+%%% 
+%%% Make and start the board start SW.
+%%%  boot_service initiates tcp_server and l0isten on port
+%%%  Then it's standby and waits for controller to detect the board and start to load applications
+%%% 
+%%%     
+%%% -------------------------------------------------------------------
+-module(install_test). 
+
+%% --------------------------------------------------------------------
+%% Include files
+%% --------------------------------------------------------------------
+-include("test_src/compute_test.hrl").
+-include_lib("kernel/include/logger.hrl").
+%% --------------------------------------------------------------------
+%-include_lib("eunit/include/eunit.hrl").
+%% --------------------------------------------------------------------
+%% Key Data structures
+%% 
+%% --------------------------------------------------------------------
+-define(WAIT_FOR_TABLES,10000).	  
+-define(MaxRandNum,5).
+
+-define(AsusVarmdo_IP,"192.168.1.50").
+-define(AsusVarmdo_Port,22).
+-define(AsusVarmdo_Uid,"joq62").
+-define(AsusVarmdo_Pw,"festum01").
+-define(HostCheckTO,5000).
+
+%% --------------------------------------------------------------------
+-export([test/0
+	]).
+
+%% ====================================================================
+%% External functions
+%% ====================================================================
+
+test()->
+    ssh:start(),
+    Host="joq62-X550CA",
+    [_,_,_,_]=set_up_test(["master","slave1","slave2","slave3"],Host), 
+
+    %Check if host is running
+    Ip=?AsusVarmdo_IP,
+    SshPort=?AsusVarmdo_Port,
+    Uid=?AsusVarmdo_Uid,
+    Pw=?AsusVarmdo_Pw,
+    TimeOut=?HostCheckTO,
+
+    true=check_running_host(Ip,SshPort,Uid,Pw,TimeOut),
+
+    % Wrong Ip
+    Err1=my_ssh:ssh_send("glurk",SshPort,Uid,Pw,"hostname",5000),
+    io:format("Err1 = ~p~n",[Err1]), 
+
+    %Start master node
+    ErlStartComputerNode="erl -sname node0 -setcookie abc -detached",
+    my_ssh:ssh_send(Ip,SshPort,Uid,Pw,ErlStartComputerNode,5000),
+    timer:sleep(2000),
+    ComputerNode='node0@joq62-X550CA',
+    R=net_adm:ping(ComputerNode),  
+    io:format("R = ~p~n",[R]),
+    
+    % Start slaves "slave1","slave2","slave3"
+    NodeIds=["slave1","slave2","slave3"],
+    Host=net_adm:localhost(),
+    ErlSlave="-setcookie abc",
+    [{ok,Node1},
+     {ok,Node2},
+     {ok,Node3}]=[rpc:call(ComputerNode,slave,start,[Host,NodeId,ErlSlave])||NodeId<-NodeIds],
+    io:format("Slaves = ~p~n",[{Node1,Node2,Node3}]),
+
+    %-----------
+    %Load start apps on slave 1
+    
+
+
+
+
+    %-----------
+    log(),
+    ok.
+
+
+%% --------------------------------------------------------------------
+%% Function:start
+%% Description: List of test cases 
+%% Returns: non
+%% --------------------------------------------------------------------
+check_running_host(Ip,SshPort,Uid,Pw,TimeOut)->
+    CheckMsg="lsb_release -d",
+    R=my_ssh:ssh_send(Ip,SshPort,Uid,Pw,CheckMsg,TimeOut),
+    Reply=case R of
+	       ["Description:\tUbuntu 20.04.2 LTS"]->
+		   true;
+	       _->
+		   false
+	   end,
+    io:format("Reply = ~p~n",[Reply]), 
+    Reply.
+%% --------------------------------------------------------------------
+%% Function:start
+%% Description: List of test cases 
+%% Returns: non
+%% --------------------------------------------------------------------
+set_up_test(NodeIds,Host)->
+    NodesToStop=[list_to_atom(NodeId++"@"++Host)||NodeId<-NodeIds],
+    [rpc:call(Node,init,stop,[])||Node<-NodesToStop].
+
+  
+log()->
+    
+    ok.
+
+
+   
+

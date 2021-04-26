@@ -1,0 +1,12 @@
+{'board1@joq62-X550CA',[{'a_board1@joq62-X550CA',"-setcookie abc"},
+	                {'b_board1@joq62-X550CA',"-setcookie abc"},
+			{'c_board1@joq62-X550CA',"-setcookie abc"}]		 
+			  }.
+{'board2@joq62-X550CA',[{'a_board2@joq62-X550CA',"-setcookie abc"},
+	                 {'b_board2@joq62-X550CA',"-setcookie abc"},
+			 {'c_board2@joq62-X550CA',"-setcookie abc"}]
+			  }.
+{'board3@joq62-X550CA',[{'a_board3@joq62-X550CA',"-setcookie abc"},
+	                  {'b_board3@joq62-X550CA',"-setcookie abc"},
+			  {'c_board3@joq62-X550CA',"-setcookie abc"}]
+			  }.

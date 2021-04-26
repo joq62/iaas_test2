@@ -1,0 +1,8 @@
+{common,
+	"1.0.0",
+	"git clone https://github.com/joq62/common_src.git common",
+	["ebin"]}.
+{glurk,
+	"1.2.0",	
+	"git clone https://github.com/joq62/glurk.git glurk",
+	["ebin"]}.
