@@ -56,7 +56,6 @@ init_dbase_test()->
     ok.    
     % Create iaas table
     
-    
 mnesia_start_test()->
     % Create locks
     [iaas]=db_lock:read_all(),
@@ -65,35 +64,8 @@ mnesia_start_test()->
     
     
     % Create hosts_config table
-    ok=db_hosts_config:create_table(),
-    FileName="host.config",
-    ConfigDir="configs",
-    File=filename:join(ConfigDir,FileName),
-    {atomic,ok}=db_hosts_config:create(FileName,?HostConfigPath,ConfigDir),
-    [{FileName,GitPath,ConfigDir}]=db_hosts_config:read(FileName),
-    case filelib:is_dir(ConfigDir) of
-	true->
-	    os:cmd("rm -rf "++File);
-	false->
-	    ok=file:make_dir(ConfigDir)
-    end,
-    % and Load from github and store mnesia 
-    os:cmd("rm -rf "++ConfigDir),
-    ok=db_hosts:create_table(),
-    [{FileName,GitPath,ConfigDir}]=db_hosts_config:read(FileName),
-    os:cmd("git clone "++GitPath++" "++ConfigDir),
-    {ok,HostInfo}=file:consult(File),
-    [db_hosts:create(Host,Ip,Port,?Uid,?Pw,SlaveVmIdList)||{{id,Host},
-							    {ip,Ip},
-							    {port,Port},
-							    {slaves,SlaveVmIdList}}<-HostInfo],
-  
-    %Create table and load
-  
 
-    
-
-    %% Create Wanted state and check nodes to Restart and Stop
+    %% Create and starte master nodes
     AllHostInfo=db_hosts:read_all(),
     AllWanted=[[list_to_atom("master@"++atom_to_list(Host))|wanted_slaves(Host,Slaves)]||
 		    {Host,_Ip,_Port,_Uid,_Pw,Slaves}<-AllHostInfo],
@@ -104,6 +76,10 @@ mnesia_start_test()->
     AllHosts=db_hosts:read_all(),
     StartMasterResult=[start_master(XHostInfo,ErlCmd)||XHostInfo<-AllHosts],
      io:format("StartMasterResult ~p~n",[{StartMasterResult,?MODULE,?FUNCTION_NAME,?LINE}]),
+
+
+    %% Create Wanted state and check nodes to Restart and Stop
+
     % Start slaves on running nodes 
     ErlSlave="-setcookie "++?Cookie,
     
@@ -122,14 +98,7 @@ mnesia_start_test()->
     io:format("StopNodes ~p~n",[{StopNodes,?MODULE,?FUNCTION_NAME,?LINE}]),   
 
    % Test this part 
-    [{{id,'joq62-X550CA'},{ip,"192.168.1.50"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
-     {{id,c0},{ip,"192.168.1.200"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
-     {{id,c1},{ip,"192.168.1.201"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}},
-     {{id,c2},{ip,"192.168.1.202"},{port,22},
-      {slaves,["slave0","slave1","slave2","slave3","slave4"]}}]=HostInfo,
+  
     
     [{"192.168.1.50",22,"joq62","festum01",
      ["slave0","slave1","slave2","slave3","slave4"]}]=db_hosts:read('joq62-X550CA'),

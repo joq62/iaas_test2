@@ -11,71 +11,68 @@
 %%% 
 %%%     
 %%% -------------------------------------------------------------------
--module(iaas_unit_test). 
+-module(cluster_test). 
 
 %% --------------------------------------------------------------------
 %% Include files
 %% --------------------------------------------------------------------
-
+-include_lib("kernel/include/logger.hrl").
 %% --------------------------------------------------------------------
-%%-include_lib("eunit/include/eunit.hrl").
+%-include_lib("eunit/include/eunit.hrl").
 %% --------------------------------------------------------------------
 %% Key Data structures
 %% 
 %% --------------------------------------------------------------------
 -define(WAIT_FOR_TABLES,10000).	  
 -define(MaxRandNum,5).
+
+-define(IP,"192.168.1.50").
+-define(Port,22).
+-define(Uid,"joq62").
+-define(Pw,"festum01").
+-define(HostCheckTO,5000).
+-define(HostConfigPath,"https://github.com/joq62/host_config.git").
+-define(Cookie,"abc").
 %% --------------------------------------------------------------------
 -export([test/0
-
 	]).
 
 %% ====================================================================
 %% External functions
 %% ====================================================================
-node_name(Name)->
-    {ok,Host}=inet:gethostname(),
-    Node=list_to_atom(Name++"@"++Host),    
-    Node.
-host()->
-    {ok,Host}=inet:gethostname(),
-    Host.
 
-vm_id(Vm)->
-    [VmId,Host]=string:tokens(atom_to_list(Vm),"@"),
-    VmId.
-
-a_sysinfo()->
-    {ok,Host}=inet:gethostname(),
-    NodeA=list_to_atom("a@"++Host),
-    rpc:call(NodeA,mnesia,system_info,[]).
-
-
-%% --------------------------------------------------------------------
-%% 
-%% 
-%% --------------------------------------------------------------------
 test()->
-    io:format("Start test ~p~n",[?MODULE]),
+    % Some test clean up
+    rpc:call('master@joq62-X550CA',init,stop,[]),
+    ok=cluster:start(),
+    ok=check_config(),
+    ok=check_master_nods(),
+  %  ok=check_dist_mnesia(),
     
-    io:format("cluster_test() ~n"),
-    ok=cluster_test:test(),
 
-%    io:format("install_test() ~n"),
-  %  ok=install_test:test(),
-%    io:format("iaas_test() ~n"),
- %    ok=iaas_test:start(),
-%    ok=defines_test(),
- %   io:format("clean_start_test() ~n"),
- %   ok=clean_start_test(),
- %   io:format("connect_boards_test() ~n"),
-%    ok=connect_boards_test(),
- %   io:format("start_slaves_test() ~n"),
- %   ok=start_slaves_test(),
+
+    ok.
+
+check_master_nods()->
     
-     io:format("Successfully Stop test ~p~n",[?MODULE]),
     
     ok.
-% Test defines
+
+check_config()->
+ 	[{"host.config",
+	  "https://github.com/joq62/host_config.git",
+	  "configs"
+	 }]=db_hosts_config:read_all(),
+    ok.
 
 
+init_dbase_test()->
+
+    ok.    
+    % Create iaas table
+    
+cluster_start_test()->
+
+    
+
+    ok.
